@@ -112,3 +112,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+PRACTICUM_TOKEN=AQAAAAAFw6l_AAYckc9oWTO7oEgiuzim9vFUT6g
+TELEGRAM_TOKEN=5151322602:AAG3x24OJmksAwz0zuAgXJUbctjSE_m-HT0
+TELEGRAM_CHAT_ID=5196380385
