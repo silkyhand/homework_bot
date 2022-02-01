@@ -36,7 +36,7 @@ ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
 
-HOMEWORK_STATUSES = {
+VERDICTS = {
     'approved': 'Работа проверена: ревьюеру всё понравилось. Ура!',
     'reviewing': 'Работа взята на проверку ревьюером.',
     'rejected': 'Работа проверена: у ревьюера есть замечания.'
@@ -49,7 +49,8 @@ def send_message(bot, message):
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
         logger.info(f'Сообщение {message} отправлено в {TELEGRAM_CHAT_ID}')
     except Exception:
-        logger.error(f'Сообщение {message} не отправлено в {TELEGRAM_CHAT_ID}')
+        logger.exception(f'Сообщение {message}'
+                         f' не отправлено в {TELEGRAM_CHAT_ID}')
 
 
 def get_api_answer(current_timestamp):
@@ -61,16 +62,21 @@ def get_api_answer(current_timestamp):
     try:
         homework_statuses = requests.get(
             ENDPOINT, headers=HEADERS, params=params
-        )
+        )        
     except requests.exceptions.RequestException as error:
-        message_api_1 = f'Ошибка при запросе к эндпоинту API: {error}'
-        logger.error(message_api_1)
+        api_request_error = f'Ошибка при запросе к эндпоинту API: {error}'
+        logger.error(api_request_error)
         raise error
     if homework_statuses.status_code != HTTPStatus.OK:
-        message_api_2 = (f'Код API:{homework_statuses.status_code},'
-                         f'должен быть {HTTPStatus.OK}')
-        logger.error(message_api_2)
-        raise requests.HTTPError(message_api_2)
+        api_status_error = (f'Код API:{homework_statuses.status_code},'
+                            f'должен быть {HTTPStatus.OK}')
+        logger.error(api_status_error)
+        raise requests.HTTPError(api_status_error)        
+    if len(homework_statuses.json()) == 0:
+        api_not_data = 'Ответ не содержит данных'
+        logger.error(api_not_data)
+        raise IndexError(api_not_data)
+
     return homework_statuses.json()
 
 
@@ -97,11 +103,11 @@ def parse_status(homework):
     """Информации о конкретной домашней работе и статус этой работы."""
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
-    if homework_status not in HOMEWORK_STATUSES.keys():
+    if homework_status not in VERDICTS.keys():
         message_status = 'Недокументированный статус домашней работы'
         logger.error(message_status)
         raise KeyError(message_status)
-    verdict = HOMEWORK_STATUSES[homework_status]
+    verdict = VERDICTS[homework_status]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
