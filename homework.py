@@ -64,7 +64,6 @@ def get_api_answer(current_timestamp):
         homework_statuses = requests.get(
             ENDPOINT, headers=HEADERS, params=params
         )
-        print(type(homework_statuses))
     except requests.exceptions.RequestException as error:
         api_request_error = f'Ошибка при запросе к эндпоинту API: {error}'
         logger.error(api_request_error)
@@ -75,12 +74,11 @@ def get_api_answer(current_timestamp):
         logger.error(api_status_error)
         raise requests.HTTPError(api_status_error)
     try:
-        homework_statuses.json()
+        return homework_statuses.json()
     except JSONDecodeError:
         api_json_error = 'Некорректный json'
         logger.error(api_json_error)
         raise JSONDecodeError(api_json_error)
-    return homework_statuses.json()
 
 
 def check_response(response):
@@ -150,7 +148,6 @@ def main():
             if check_response_correct:
                 last_homework = check_response_correct[0]
                 status = parse_status(last_homework)
-                print(status)
                 if homework_status != status:
                     homework_status = status
                     send_message(bot, status)
