@@ -136,7 +136,7 @@ def check_tokens():
 def main():
     """Основная логика работы бота."""
     homework_status = ''
-    current_timestamp = (int(time.time()) - SEC_IN_DAY)
+    current_timestamp = (int(time.time()) - SEC_IN_DAY * 10)
     error_message = ''
     if not check_tokens():
         return
